@@ -1,0 +1,64 @@
+#确立cmake运行的最小版本
+cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+
+#确认工程名、CMake使用的语言
+project(recipe-1 LANGUAGES CXX)
+
+#指示CMake创建新目标：可执行文件 camera
+add_executable(camera main.cpp)
+
+
+#add_library()
+#第一个参数为目标名
+#第二个参数决定为静态库.a还是动态库.so
+#第二个参数值：
+# STATIC：用于创建静态库
+# SHARED：用于创建动态库
+# OBJECT：可将给定add_libiary的列表中的源码编译到目标文件，不将他们归档到静态库中，也不能
+# 将他们链接到共享对象中。在一次性创建动态库和静态库中尤其有用。
+# MODULE: 该参数可以用于构建运行时的插件
+
+#创建目标-静态库
+add_library(message
+    STATIC
+        Message.hpp
+        Message.cpp
+    )
+
+#设置目标相应的属性
+set_target_properties()
+add_library(message-shared
+  SHARED
+    $<TARGET_OBJECTS:message-objs>
+    )
+set_target_properties(message-shared
+    PROPERTIES
+        OUTPUT_NAME "message"
+    )
+
+#将目标库链接到可执行目标
+target_link_libraries(camera opencv)
+
+
+
+#条件控制语句
+#1定义Cmake版本，项目名称和支持的语言
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+project(recipe-04 LANGUAGES CXX)
+#2引入变量并预设其值为OFF 打印其值
+set(USE_LIBRARY OFF)
+message(STATUS "Compile sources into a library? ${USE_LIBRARY}")
+#3定义全局变量，并设置值为OFF。调用add_library并省略第二个参数，将构建一个静态库。
+set(BUILD_SHARED_LIBS OFF)
+#4引入一个变量_sources，包括Message.hpp和Message.cpp
+list(APPEND _sources Message.hpp Message.cpp)
+#5引入一个基于USE_LIBRARY值的if-else语句。如果逻辑为真，则Message.hpp和Message.cpp将打包成一个库
+if(USE_LIBRARY)
+    # add_library will create a static library
+    # since BUILD_SHARED_LIBS is OFF
+    add_library(message ${_sources})
+    add_executable(hello-world hello-world.cpp)
+    target_link_libraries(hello-world message)
+else()
+    add_executable(hello-world hello-world.cpp ${_sources})
+endif()
